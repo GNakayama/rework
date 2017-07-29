@@ -54,7 +54,8 @@ export default class BaseCRUD extends React.Component {
     }
 
     onEdit(updatedItems, item) {
-        this.setState(merge(updatedItems, { [item.id]: { 'error': cloneDeep(item.error) } }));
+        const data = this.props.updateComponent ? cloneDeep(item) : { 'error': cloneDeep(item.error) };
+        this.setState(merge(updatedItems, { [item.id]: data }));
     }
 
     onCancel(updatedItems, id) {
@@ -117,6 +118,8 @@ export default class BaseCRUD extends React.Component {
                   onEdit={this.onEdit}
                   onCancel={this.onCancel}
                   onItemUpdate={this.onItemUpdate}
+                  updateComponent={this.props.updateComponent}
+                  error={this.state.error}
                 />
             </div>
         );
@@ -145,5 +148,6 @@ BaseCRUD.propTypes = {
     'onRemove': PropTypes.func,
     'validate': PropTypes.func,
     'item': PropTypes.object,
-    'className': PropTypes.string
+    'className': PropTypes.string,
+    'updateComponent': PropTypes.func
 };
