@@ -1,6 +1,10 @@
 // Libs
 import Immutable from 'seamless-immutable';
 
+import cloneDeep from 'lodash/cloneDeep';
+import assignIn from 'lodash/assignIn';
+// import unionBy from 'lodash/unionBy';
+
 export default function items(
     state,
     action,
@@ -14,7 +18,8 @@ export default function items(
     switch (action.type) {
         case RECEIVE: {
             const newItems = action.payload.items.items.map(item => Object.assign({ error, 'key': item.id }, item));
-            const allItems = Array.from(new Set([...state.items, ...newItems]));
+            // const allItems = unionBy(state.items, newItems, 'id');
+            const allItems = newItems;
 
             return Immutable.from({
                 'total': action.payload.items.total,
@@ -34,7 +39,7 @@ export default function items(
 
             const updatedItems = state.items.map(item => {
                 if (item.id === action.payload.item.id) {
-                    return action.payload.item;
+                    return assignIn(cloneDeep(item), cloneDeep(action.payload.item.item));
                 }
 
                 return item;

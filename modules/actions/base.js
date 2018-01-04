@@ -42,7 +42,7 @@ export function get(id, actionType, endpoint, local = false) {
             return Promise.resolve();
         }
 
-        return fetch(`${MAIN_URL}/${endpoint}`, {
+        return fetch(`${MAIN_URL}/${endpoint}\/${id}`, {
             'headers': {
                 'X-Auth-Token': Cookies.getCookie('Session')
             }
