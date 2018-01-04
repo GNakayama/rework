@@ -1,10 +1,6 @@
 // Libs
 import Immutable from 'seamless-immutable';
 
-import cloneDeep from 'lodash/cloneDeep';
-import assignIn from 'lodash/assignIn';
-// import unionBy from 'lodash/unionBy';
-
 export default function items(
     state,
     action,
@@ -17,9 +13,12 @@ export default function items(
     UPDATE_ALL = 'action6') {
     switch (action.type) {
         case RECEIVE: {
+            if (state.items.length > (action.payload.items.page) * (action.payload.items.limit)) {
+                return state;
+            }
+
             const newItems = action.payload.items.items.map(item => Object.assign({ error, 'key': item.id }, item));
-            // const allItems = unionBy(state.items, newItems, 'id');
-            const allItems = newItems;
+            const allItems = Array.from(new Set([...state.items, ...newItems]));
 
             return Immutable.from({
                 'total': action.payload.items.total,
@@ -39,7 +38,7 @@ export default function items(
 
             const updatedItems = state.items.map(item => {
                 if (item.id === action.payload.item.id) {
-                    return assignIn(cloneDeep(item), cloneDeep(action.payload.item.item));
+                    return action.payload.item;
                 }
 
                 return item;
@@ -48,8 +47,9 @@ export default function items(
             return Immutable.from(Object.assign({ ...state }, { 'items': updatedItems }));
         }
         case INSERT: {
-            const newItems = action.payload.items.map(item => ({ ...item, error, 'key': item.id }));
-            const allItems = Array.from(new Set([...state.items, ...newItems]));
+            const item = action.payload.item;
+            const newItem = { ...item, error, 'key': item.id };
+            const allItems = Array.from(new Set([...state.items, ...[newItem]]));
 
             return Immutable.from(Object.assign({ ...state }, { 'items': allItems }));
         }

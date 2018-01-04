@@ -111,12 +111,10 @@ export default class BaseCRUD extends React.Component {
                   item={this.state.item}
                 />
                 <this.props.list
-                  items={this.props.items}
+                  {...this.props}
                   updatedItems={this.state.updatedItems}
-                  columns={this.props.columns}
                   onUpdate={this.onUpdate}
                   onUpdateAll={this.onUpdateAll}
-                  onRemove={this.props.onRemove}
                   onEdit={this.onEdit}
                   onCancel={this.onCancel}
                   onItemUpdate={this.onItemUpdate}
@@ -140,13 +138,14 @@ BaseCRUD.propTypes = {
     'insertForm': PropTypes.func.isRequired,
     'list': PropTypes.func.isRequired,
     'items': PropTypes.array.isRequired,
-    'columns': PropTypes.array.isRequired,
     'error': PropTypes.object.isRequired,
+    'columns': PropTypes.array,
     'onInsert': PropTypes.func,
     'onUpdate': PropTypes.func,
     'onUpdateAll': PropTypes.func,
     'onRemove': PropTypes.func,
     'validate': PropTypes.func,
     'item': PropTypes.object,
-    'className': PropTypes.string
+    'className': PropTypes.string,
+    'view': PropTypes.func
 };

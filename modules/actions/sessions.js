@@ -10,8 +10,6 @@ import { startRequest, stopRequest } from '~/framework/modules/actions/common';
 import Cookies from '../../libs/cookies';
 
 
-// Actions
-
 function confirmLogout() {
     return {
         'type': LOGOUT,
@@ -21,9 +19,16 @@ function confirmLogout() {
     };
 }
 
-export function logout() {
+export function logout(local = false) {
     return function foo(dispatch) {
         dispatch(startRequest());
+
+        if (local) {
+            Cookies.remove('Session');
+            Cookies.remove('user');
+            dispatch(confirmLogout());
+            return Promise.new();
+        }
 
         return fetch(`${MAIN_URL}/logout`, {
             'method': 'POST',
@@ -35,6 +40,7 @@ export function logout() {
 
             if (response.status === 204) {
                 Cookies.remove('Session');
+                Cookies.remove('user');
                 dispatch(confirmLogout());
             } else if (response.status === 500) {
                 dispatch(serverFailed());
@@ -45,7 +51,7 @@ export function logout() {
     };
 }
 
-function receiveToken(token) {
+export function receiveToken(token) {
     Cookies.setCookie('Session', token);
 
     return {
@@ -65,17 +71,16 @@ function loginFailed() {
     };
 }
 
-export function login(email, password) {
+export function login(credentials) {
     return function (dispatch) {
         dispatch(startRequest());
 
         return fetch(`${MAIN_URL}\/login`, {
             'method': 'POST',
             'headers': {
-                'X-Auth-Token': '',
                 'Content-Type': 'application/json'
             },
-            'body': JSON.stringify({ email, password })
+            'body': JSON.stringify(credentials)
         }).then(response => {
             dispatch(stopRequest());
 

@@ -42,7 +42,7 @@ export function get(id, actionType, endpoint, local = false) {
             return Promise.resolve();
         }
 
-        return fetch(`${MAIN_URL}/${endpoint}\/${id}`, {
+        return fetch(`${MAIN_URL}/${endpoint}`, {
             'headers': {
                 'X-Auth-Token': Cookies.getCookie('Session')
             }
@@ -79,7 +79,7 @@ export function get(id, actionType, endpoint, local = false) {
     };
 }
 
-export function getAll(page, limit, actionType, endpoint, local = false) {
+export function getAll(page, limit, filter, order, actionType, endpoint, local = false) {
     return function foo(dispatch) {
         dispatch(startRequest());
 
@@ -171,7 +171,7 @@ export function remove(id, actionType, endpoint, local = false) {
         }).then(response => {
             dispatch(stopRequest());
 
-            if (response.status === 200) {
+            if (response.status === 200 || response.status === 204) {
                 dispatch({
                     'type': actionType,
                     'payload': {
@@ -235,7 +235,7 @@ export function update(item, actionType, endpoint, local = false, collection = t
         }).then(response => {
             dispatch(stopRequest());
 
-            if (response.status === 200) {
+            if (response.status === 200 || response.status === 204) {
                 dispatch({
                     'type': actionType,
                     'payload': {
@@ -299,7 +299,7 @@ export function updateAll(items, actionType, endpoint, local = false) {
         }).then(response => {
             dispatch(stopRequest());
 
-            if (response.status === 200) {
+            if (response.status === 200 || response.status === 204) {
                 dispatch({
                     'type': actionType,
                     'payload': {
@@ -324,18 +324,18 @@ export function updateAll(items, actionType, endpoint, local = false) {
     };
 }
 
-export function insert(items, actionType, endpoint, local = false) {
+export function insert(item, actionType, endpoint, local = false) {
     return function foo(dispatch) {
         if (local) {
             const storageItems = JSON.parse(Storage.get(endpoint, '[]'));
 
-            items.forEach(item => storageItems.push(Object.assign(item, { 'id': Math.random().toString(36).substring(5) })));
+            storageItems.push(Object.assign(item, { 'id': Math.random().toString(36).substring(5) }));
             Storage.set(endpoint, JSON.stringify(storageItems));
 
             dispatch({
                 'type': actionType,
                 'payload': {
-                    items
+                    item
                 }
             });
 
@@ -348,7 +348,7 @@ export function insert(items, actionType, endpoint, local = false) {
                 'X-Auth-Token': Cookies.getCookie('Session'),
                 'Content-Type': 'application/json'
             },
-            'body': JSON.stringify({ items })
+            'body': JSON.stringify(item)
         }).then(response => {
             dispatch(stopRequest());
 
@@ -366,12 +366,10 @@ export function insert(items, actionType, endpoint, local = false) {
 
             return null;
         }).then(json => {
-            const newItems = items.map((item, index) => Object.assign(item, { 'id': json.ids[index] }));
-
             dispatch({
                 'type': actionType,
                 'payload': {
-                    'items': newItems
+                    'item': json
                 }
             });
         }).catch(reason => {
